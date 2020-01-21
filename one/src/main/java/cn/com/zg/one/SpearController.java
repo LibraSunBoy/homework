@@ -21,65 +21,100 @@ public class SpearController {
 
     private volatile static long bulletNum = 0L;
 
+    private volatile static boolean flag = false;
 
     private static Object obj1 = new Object();
 
     private static Object obj2 = new Object();
 
-    private static class SpearThread1 extends Thread{
+    private static class SpearInThread extends Thread{
 
         private String name;
 
-        public SpearThread1(String name){
+        public SpearInThread(String name){
             this.name = name;
         }
 
         @Override
         public void run() {
             try{
-                while (!isInterrupted()){
-                    if (bulletNum<20L){
-                        synchronized (obj1){
-                            bulletNum++;
-                            System.out.println(name+"正在装填子弹，已有"+bulletNum);
-                            sleep(500);
-                        }
-                    }else{
-                        synchronized (obj1) {
-                            interrupt();
-                            notifyAll();
-                            System.out.println("子弹已装填完毕！");
+//                System.out.println(name+"开始装填子弹！");
+//                while (bulletNum<20L){
+//                        bulletNum++;
+//                        System.out.println(name+"正在装填子弹，已有"+bulletNum);
+//                        sleep(500);
+//                }
+//                System.out.println(name+"子弹已装填完毕！");
+                    System.out.println(name+"开始装填子弹！");
+                    while (!flag){
+                        synchronized(obj1) {
+                            if (!flag){
+                                if (bulletNum<20L) {
+                                    bulletNum++;
+                                    sleep(200);
+                                    System.out.println(name + "正在装填子弹，已有" + bulletNum);
+                                }else{
+                                    flag=true;
+                                }
+                            }
                         }
                     }
-                }
+                    System.out.println(name + "子弹已装填完毕！");
+                    synchronized(obj2){
+                        sleep(200);
+                        obj2.notifyAll();
+                    }
             }catch (Exception e){
                 System.out.println("e:"+e);
             }
         }
     }
 
-    private static class SpearThread2 extends Thread{
+    private static class SpearOutThread extends Thread{
+
         private String name;
 
-        public SpearThread2(String name){
+        private SpearInThread spearInThread;
+
+        public SpearOutThread(String name){
             this.name = name;
         }
+
+//        public SpearOutThread(String name,SpearInThread spearInThread){
+//            this.name = name;
+//            this.spearInThread = spearInThread;
+//        }
         @Override
         public void run() {
             try{
-                synchronized (obj2) {
-                    while (!isInterrupted()) {
-                        obj2.wait();
+//                spearInThread.join();
+//                System.out.println(name+"开始发射子弹！");
+//                while (bulletNum>0L){
+//                    bulletNum--;
+//                    System.out.println(name+"正在发射子弹，剩下"+bulletNum);
+//                    sleep(500);
+//                }
+//                System.out.println(name+"子弹已发射完毕！");
+
+                synchronized (obj2){
+                    if (!flag) {
+                        while (bulletNum < 20L) {
+                            obj2.wait();
+                        }
                     }
                 }
+                sleep(1000);
+                System.out.println(name+"开始发射子弹！");
                 while (bulletNum>0L){
-                    synchronized (obj2){
-                        bulletNum--;
-                        System.out.println(name+"正在发射子弹，剩下"+bulletNum);
-                        sleep(500);
+                    synchronized (obj1) {
+                        if (bulletNum>0L){
+                            bulletNum--;
+                            System.out.println(name + "正在发射子弹，剩下" + bulletNum);
+                            sleep(500);
+                        }
                     }
                 }
-                System.out.println(name+"子弹已发射完毕！");
+                System.out.println("子弹已发射完毕！");
             }catch (Exception e){
                 System.out.println("e:"+e);
             }
@@ -87,12 +122,14 @@ public class SpearController {
     }
 
     public static void  main(String[] args)throws Exception{
-
-        System.out.println("开始装填子弹！");
-        new SpearThread1("线程1").start();
-        new SpearThread1("线程2").start();
-        System.out.println("开始发射子弹！");
-        new SpearThread2("线程3").start();
-        new SpearThread2("线程4").start();
+//        ThreadLocal<String> stringThreadLocal = new ThreadLocal<String>();
+        SpearInThread inThread1 = new SpearInThread("线程1");
+        SpearInThread inThread2 = new SpearInThread("线程2");
+        SpearOutThread outThread1 = new SpearOutThread("线程3");
+        SpearOutThread outThread2 = new SpearOutThread("线程4");
+        inThread1.start();
+        inThread2.start();
+        outThread1.start();
+        outThread2.start();
     }
 }
