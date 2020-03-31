@@ -122,7 +122,7 @@ public class SpearController {
     }
 
     public static void  main(String[] args)throws Exception{
-//        ThreadLocal<String> stringThreadLocal = new ThreadLocal<String>();
+        ThreadLocal<String> stringThreadLocal = new ThreadLocal<String>();
         SpearInThread inThread1 = new SpearInThread("线程1");
         SpearInThread inThread2 = new SpearInThread("线程2");
         SpearOutThread outThread1 = new SpearOutThread("线程3");
