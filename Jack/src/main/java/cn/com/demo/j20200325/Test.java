@@ -4,8 +4,9 @@ import cn.com.demo.j20200325.bean.Scope;
 import cn.com.demo.j20200325.init.FactoryBeanClass;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
-import java.util.Arrays;
-import java.util.List;
+import java.lang.reflect.Array;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * <pre>
@@ -62,5 +63,12 @@ public class Test {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+
+    @org.junit.Test
+    public void test5(){
+
+
     }
 }
